@@ -28,3 +28,4 @@ build/*
 teshose.iml
 teshose-core/teshose-core.iml
 .idea/*
+teshose-core/build/*

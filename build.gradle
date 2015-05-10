@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'idea'
  
 repositories {
     mavenCentral()
@@ -6,4 +7,11 @@ repositories {
  
 dependencies {
     testCompile 'junit:junit:4.12'
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
 }
