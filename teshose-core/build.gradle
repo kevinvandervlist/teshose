@@ -9,8 +9,3 @@ mainClassName = 'nl.soqua.teshose.Teshose'
 repositories {
     mavenCentral()
 }
-
-compileJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-}

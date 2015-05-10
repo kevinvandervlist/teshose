@@ -15,3 +15,12 @@ idea {
         downloadSources = true
     }
 }
+
+allprojects {
+    tasks.withType(JavaCompile) {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+        options.incremental = true
+        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+    }
+}
