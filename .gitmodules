@@ -1,5 +1,5 @@
 [submodule "telegram-tl-core"]
-	path = telegram-tl-core
+	path = tl-core
 	url = git@github.com:ex3ndr/telegram-tl-core.git
 [submodule "telegram-mt"]
 	path = telegram-mt
