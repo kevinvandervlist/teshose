@@ -25,3 +25,6 @@ _testmain.go
 
 build/*
 .gradle/*
+teshose.iml
+teshose-core/teshose-core.iml
+.idea/*
