@@ -1,0 +1,2 @@
+include ':telegram-api'
+project(':telegram-api').projectDir = new File( '../teelgram-api' )
