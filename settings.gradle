@@ -1,0 +1,5 @@
+rootProject.name='teshose' 
+include 'telegram-api','teshose-core', ':tl-core', ':mtproto'
+
+project(':tl-core').projectDir = new File( 'tl-core' )
+project(':mtproto').projectDir = new File( 'mtproto' )
