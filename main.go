@@ -14,7 +14,7 @@ func main() {
 	key := os.Getenv("TELEGRAM_BOT_TOKEN")
 
 	if key == "" {
-		log.Info("Please provide a bot token in the environment variable 'TELEGRAM_BOT_API'.")
+		log.Info("Please provide a bot token in the environment variable 'TELEGRAM_BOT_TOKEN'.")
 		os.Exit(0)
 	}
 
