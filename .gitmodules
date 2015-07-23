@@ -1,9 +1,0 @@
-[submodule "telegram-tl-core"]
-	path = tl-core
-	url = git@github.com:ex3ndr/telegram-tl-core.git
-[submodule "telegram-mt"]
-	path = mtproto
-	url = git@github.com:ex3ndr/telegram-mt.git
-[submodule "telegram-api"]
-	path = telegram-api
-	url = git@github.com:ex3ndr/telegram-api.git
