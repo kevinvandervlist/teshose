@@ -5,6 +5,7 @@ import (
 	"github.com/op/go-logging"
 	"github.com/kevinvandervlist/teshose/api"
 	"github.com/kevinvandervlist/teshose/plugin"
+	"github.com/kevinvandervlist/teshose/messages"
 )
 
 var log = logging.MustGetLogger("example")
@@ -17,21 +18,12 @@ func main() {
 		os.Exit(0)
 	}
 
-	commands := plugin.Create()
-
-	/*
-	foo, _ := plugin.Exec("Foo")
-	bar, _ := plugin.Exec("Bar")
-	baz, _ := plugin.Exec("Baz")
-
-	fmt.Printf("Foo: %s\n", foo)
-	fmt.Printf("Bar: %s\n", bar)
-	fmt.Printf("Bar: %s\n", baz)
-	*/
-
 	api := api.Create(log, key);
 	api.Debug(true)
 	err := api.Connect()
+
+	commands := plugin.Create(log)
+	broker := messages.Create(api)
 
 	if(err != nil) {
 		log.Critical("A connection error occurred: ", err)
@@ -45,14 +37,21 @@ func main() {
 			panic(e)
 			return
 		case raw := <- api.ReceiveMessagesChannel:
-			log.Info("A message is received: %s", raw.Text)
-			//cmd := commands.parse(raw.Text)
-			m := plugin.IncomingMessage{
-				Text: raw.Text,
-			}
-			func() {
-				resp := commands.Exec("echo", m)
-				api.SendMessagesChannel <- actualResponse
+			log.Info("Received a message from %s in %s(%d): %s", raw.Chat.FirstName, raw.Chat.Title, raw.Chat.ID ,raw.Text)
+			go func() {
+				inbound := broker.ConvertInbound(raw)
+
+				resp, err := commands.Exec(raw.Text, &inbound)
+
+				if(err != nil) {
+					log.Error("An error occurred!", err)
+				}
+
+				if(resp.NoOp) {
+					return
+				}
+
+				api.SendMessagesChannel <- broker.ConvertOutbound(resp)
 			}()
 		}
 	}
