@@ -3,9 +3,10 @@ package plugin
 import (
 	"reflect"
 	"errors"
-	"github.com/kevinvandervlist/teshose/messages"
 	"strings"
 	"github.com/op/go-logging"
+	"github.com/Syfaro/telegram-bot-api"
+	"github.com/kevinvandervlist/teshose/container"
 )
 
 type Plugin struct {
@@ -20,7 +21,7 @@ func Create(logger *logging.Logger) (*Plugin) {
 
 // Invoke this method with the name of the actual method you want to invoke. The second parameter should be the
 // received message. The message to send as a response should be returned by it.
-func (plugin *Plugin) Exec(cmd string, message *messages.IncomingMessage) (*messages.ResponseMessage, error) {
+func (plugin *Plugin) Exec(cmd string, message *tgbotapi.Message) (*container.Response, error) {
 	pluginCmd, err := plugin.getCommand(cmd)
 	plugin.logger.Debug("Exctracted command: %s", cmd)
 
@@ -41,12 +42,12 @@ func (plugin *Plugin) Exec(cmd string, message *messages.IncomingMessage) (*mess
 	}
 }
 
-func (plugin *Plugin) getMethod(pluginCmd string) (func(*messages.IncomingMessage) (*messages.ResponseMessage, error), error) {
+func (plugin *Plugin) getMethod(pluginCmd string) (func(*tgbotapi.Message) (*container.Response, error), error) {
 	method := reflect.ValueOf(plugin).MethodByName(pluginCmd)
 	if !method.IsValid() {
 		return nil, errors.New("No plugin found")
 	}
-	return method.Interface().(func(*messages.IncomingMessage)(*messages.ResponseMessage, error)), nil
+	return method.Interface().(func(*tgbotapi.Message)(*container.Response, error)), nil
 }
 
 func (plugin *Plugin) getCommand(cmd string) (string, error) {

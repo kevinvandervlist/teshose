@@ -5,7 +5,6 @@ import (
 	"github.com/op/go-logging"
 	"github.com/kevinvandervlist/teshose/api"
 	"github.com/kevinvandervlist/teshose/plugin"
-	"github.com/kevinvandervlist/teshose/messages"
 )
 
 var log = logging.MustGetLogger("example")
@@ -23,7 +22,6 @@ func main() {
 	err := api.Connect()
 
 	commands := plugin.Create(log)
-	broker := messages.Create(api)
 
 	if(err != nil) {
 		log.Critical("A connection error occurred: ", err)
@@ -39,9 +37,7 @@ func main() {
 		case raw := <- api.ReceiveMessagesChannel:
 			log.Info("Received a message from %s in %s(%d): %s", raw.Chat.FirstName, raw.Chat.Title, raw.Chat.ID ,raw.Text)
 			go func() {
-				inbound := broker.ConvertInbound(raw)
-
-				resp, err := commands.Exec(raw.Text, &inbound)
+				resp, err := commands.Exec(raw.Text, raw)
 
 				if(err != nil) {
 					log.Error("An error occurred!", err)
@@ -51,7 +47,7 @@ func main() {
 					return
 				}
 
-				api.SendMessagesChannel <- broker.ConvertOutbound(resp)
+				api.SendMessagesChannel <- resp
 			}()
 		}
 	}

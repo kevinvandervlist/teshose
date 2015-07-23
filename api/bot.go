@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/Syfaro/telegram-bot-api"
 	"github.com/op/go-logging"
+	"github.com/kevinvandervlist/teshose/container"
 )
 
 type TelegramApi struct {
@@ -13,7 +14,7 @@ type TelegramApi struct {
 	bot *tgbotapi.BotAPI
 	disconnect chan bool
 	ReceiveMessagesChannel chan *tgbotapi.Message
-	SendMessagesChannel chan *tgbotapi.MessageConfig
+	SendMessagesChannel chan *container.Response
 	ErrorChannel chan error
 	logger *logging.Logger
 }
@@ -27,7 +28,7 @@ func Create(logger *logging.Logger, token string) (*TelegramApi) {
 		nil,
 		make(chan bool, 1),
 		make(chan *tgbotapi.Message, 100),
-		make(chan *tgbotapi.MessageConfig, 100),
+		make(chan *container.Response, 100),
 		make(chan error, 10),
 		logger,
 	}
@@ -74,10 +75,25 @@ func (api *TelegramApi) Connect() (error) {
 				return
 			default:
 				response := <- api.SendMessagesChannel
-				api.logger.Info("Reply: %s", response.Text)
-				_, err := api.bot.SendMessage(*response)
-				if(err != nil) {
-					api.logger.Error("An error occurred while sending a message.", err)
+				switch response.ConfigType {
+					case "MessageConfig":
+						config, ok := response.ResponseConfig.(tgbotapi.MessageConfig)
+						if ok {
+							_, err := api.bot.SendMessage(config)
+							if(err != nil) {
+								api.logger.Error("An error occurred while sending a message.", err)
+							}
+						}
+					case "PhotoConfig":
+						config, ok := response.ResponseConfig.(tgbotapi.PhotoConfig)
+						if ok {
+							_, err := api.bot.SendPhoto(config)
+							if(err != nil) {
+								api.logger.Error("An error occurred while sending a message.", err)
+							}
+						}
+					default:
+						api.logger.Error("No implementation found for type %s", response.ConfigType)
 				}
 			}
 		}
@@ -99,6 +115,3 @@ func (api *TelegramApi) GetMe() (tgbotapi.User, error) {
 	return api.bot.GetMe()
 }
 
-func (api *TelegramApi) NewMessage(id int, text string) tgbotapi.MessageConfig {
-	return tgbotapi.NewMessage(id, text)
-}

@@ -4,14 +4,13 @@ import (
 	"github.com/kevinvandervlist/teshose/container"
 )
 
-func (plugin *Plugin) ExecEcho(incoming *tgbotapi.Message) (*container.Response, error) {
-	config := tgbotapi.NewMessage(incoming.Chat.ID, incoming.Text)
+func (plugin *Plugin) ExecPhoto(incoming *tgbotapi.Message) (*container.Response, error) {
+	config := tgbotapi.NewPhotoUpload(incoming.Chat.ID, "/tmp/image.jpg")
 	config.ReplyToMessageID = incoming.MessageID
-	config.Text = "I'll just echo your messages."
 
 	response := &container.Response{
 		ResponseConfig: config,
-		ConfigType: "MessageConfig",
+		ConfigType: "PhotoConfig",
 		NoOp: false,
 	}
 
