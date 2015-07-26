@@ -1,11 +1,8 @@
 package plugin
 import (
-	"github.com/Syfaro/telegram-bot-api"
-	"github.com/kevinvandervlist/teshose/container"
+	"github.com/kevinvandervlist/teshose/plugin/commands"
 )
 
-func (plugin *Plugin) ExecNoOp(incoming *tgbotapi.Message) (*container.Response, error) {
-	return &container.Response{
-		NoOp: true,
-	}, nil
+func (p *Plugin) CreateNoOp() (PluginInstance) {
+	return commands.CreateNoOpCommand(p.logger)
 }

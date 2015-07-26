@@ -75,10 +75,12 @@ func (api *TelegramApi) Connect() (error) {
 				return
 			default:
 				response := <- api.SendMessagesChannel
+				id := 0
 				switch response.ConfigType {
 					case "MessageConfig":
 						config, ok := response.ResponseConfig.(tgbotapi.MessageConfig)
 						if ok {
+							id = config.ChatID
 							_, err := api.bot.SendMessage(config)
 							if(err != nil) {
 								api.logger.Error("An error occurred while sending a message.", err)
@@ -87,14 +89,17 @@ func (api *TelegramApi) Connect() (error) {
 					case "PhotoConfig":
 						config, ok := response.ResponseConfig.(tgbotapi.PhotoConfig)
 						if ok {
+							id = config.ChatID
 							_, err := api.bot.SendPhoto(config)
 							if(err != nil) {
-								api.logger.Error("An error occurred while sending a message.", err)
+								api.logger.Error("An error occurred while sending an image.", err)
 							}
 						}
 					default:
 						api.logger.Error("No implementation found for type %s", response.ConfigType)
 				}
+				api.logger.Debug("Response with id %d sent.", id)
+				response.CallBack()
 			}
 		}
 	}()
@@ -109,6 +114,7 @@ func (api *TelegramApi) Disconnect() {
 
 func (api *TelegramApi) Debug(state bool) {
 	api.debug = state
+	api.bot.Debug = state
 }
 
 func (api *TelegramApi) GetMe() (tgbotapi.User, error) {

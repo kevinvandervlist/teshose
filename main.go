@@ -18,8 +18,8 @@ func main() {
 	}
 
 	api := api.Create(log, key);
-	api.Debug(true)
 	err := api.Connect()
+	api.Debug(true)
 
 	commands := plugin.Create(log)
 
@@ -36,18 +36,23 @@ func main() {
 			return
 		case raw := <- api.ReceiveMessagesChannel:
 			log.Info("Received a message from %s in %s(%d): %s", raw.Chat.FirstName, raw.Chat.Title, raw.Chat.ID ,raw.Text)
+			// TODO: A pool of worker processes should handle this.
 			go func() {
-				resp, err := commands.Exec(raw.Text, raw)
+				pi := commands.BuildPluginInstance(raw.Text)
+				pi.SetRequestMessage(raw)
+				for ! pi.HasCompleted() {
+					resp, err := pi.GetResponseMessage()
 
-				if(err != nil) {
-					log.Error("An error occurred!", err)
+					if(err != nil) {
+						log.Error("An error occurred!", err)
+					}
+
+					if(resp.NoOp) {
+						return
+					}
+
+					api.SendMessagesChannel <- resp
 				}
-
-				if(resp.NoOp) {
-					return
-				}
-
-				api.SendMessagesChannel <- resp
 			}()
 		}
 	}

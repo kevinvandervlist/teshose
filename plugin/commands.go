@@ -13,45 +13,49 @@ type Plugin struct {
 	logger *logging.Logger
 }
 
+type PluginInstance interface {
+	HasCompleted() bool
+	SetRequestMessage(message *tgbotapi.Message)
+	GetResponseMessage() (*container.Response, error)
+}
+
 func Create(logger *logging.Logger) (*Plugin) {
 	return &Plugin{
 		logger: logger,
 	}
 }
 
-// Invoke this method with the name of the actual method you want to invoke. The second parameter should be the
-// received message. The message to send as a response should be returned by it.
-func (plugin *Plugin) Exec(cmd string, message *tgbotapi.Message) (*container.Response, error) {
+func (plugin *Plugin) BuildPluginInstance(cmd string) PluginInstance {
 	pluginCmd, err := plugin.getCommand(cmd)
 	plugin.logger.Debug("Exctracted command: %s", cmd)
 
 	if(err != nil) {
 		plugin.logger.Debug("No command found")
-		return plugin.ExecNoOp(message)
+		return plugin.CreateNoOp()
 	}
 
 	_func, err := plugin.getMethod(pluginCmd)
 
 	if(err != nil) {
 		plugin.logger.Debug("Command %s has no plugin -- noop.", pluginCmd)
-		return plugin.ExecNoOp(message)
+		return plugin.CreateNoOp()
 	} else {
 		plugin.logger.Debug("Executing command %s.", pluginCmd)
-		return _func(message)
+		return _func()
 
 	}
 }
 
-func (plugin *Plugin) getMethod(pluginCmd string) (func(*tgbotapi.Message) (*container.Response, error), error) {
+func (plugin *Plugin) getMethod(pluginCmd string) (func() (PluginInstance), error) {
 	method := reflect.ValueOf(plugin).MethodByName(pluginCmd)
 	if !method.IsValid() {
 		return nil, errors.New("No plugin found")
 	}
-	return method.Interface().(func(*tgbotapi.Message)(*container.Response, error)), nil
+	return method.Interface().(func()(PluginInstance)), nil
 }
 
 func (plugin *Plugin) getCommand(cmd string) (string, error) {
-	prefix := "Exec"
+	prefix := "Create"
 	plugin.logger.Debug("Input string: '%s'", cmd)
 	e := "Not a valid input string"
 
