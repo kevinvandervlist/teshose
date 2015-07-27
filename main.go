@@ -47,10 +47,6 @@ func main() {
 						log.Error("An error occurred!", err)
 					}
 
-					if(resp.NoOp) {
-						return
-					}
-
 					api.SendMessagesChannel <- resp
 				}
 			}()

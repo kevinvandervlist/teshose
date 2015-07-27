@@ -4,6 +4,7 @@ import (
 	"github.com/op/go-logging"
 	"github.com/kevinvandervlist/teshose/container"
 	"github.com/Syfaro/telegram-bot-api"
+	"errors"
 )
 
 type NoOpCommand struct {
@@ -22,7 +23,5 @@ func (cmd *NoOpCommand) SetRequestMessage(message *tgbotapi.Message) {
 }
 
 func (cmd *NoOpCommand) GetResponseMessage() (*container.Response, error) {
-	return &container.Response{
-		NoOp: true,
-	}, nil
+	return nil, errors.New("NoOp does not do anything.")
 }

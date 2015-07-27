@@ -76,7 +76,6 @@ func (cmd *TettenVrouwCommand) GetResponseMessage() (*container.Response, error)
 	response := &container.Response{
 		ResponseConfig: config,
 		ConfigType: "PhotoConfig",
-		NoOp: false,
 		CallBack: func() {
 			os.Remove(path)
 		},

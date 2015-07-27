@@ -99,7 +99,10 @@ func (api *TelegramApi) Connect() (error) {
 						api.logger.Error("No implementation found for type %s", response.ConfigType)
 				}
 				api.logger.Debug("Response with id %d sent.", id)
-				response.CallBack()
+			
+				if response.CallBack != nil {
+					response.CallBack()
+				}
 			}
 		}
 	}()

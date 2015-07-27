@@ -6,31 +6,30 @@ import (
 	"github.com/Syfaro/telegram-bot-api"
 )
 
-type EchoCommand struct {
+type HelpCommand struct {
 	hasCompleted bool
 	logger *logging.Logger
 	originalMessage *tgbotapi.Message
 }
 
-func CreateEchoCommand(logger *logging.Logger) *EchoCommand {
-	return &EchoCommand{
+func CreateHelpCommand(logger *logging.Logger) *HelpCommand {
+	return &HelpCommand{
 		hasCompleted: false,
 		logger: logger,
 	}
 }
 
-func (cmd *EchoCommand) HasCompleted() bool {
+func (cmd *HelpCommand) HasCompleted() bool {
 	return cmd.hasCompleted
 }
 
-func (cmd *EchoCommand) SetRequestMessage(message *tgbotapi.Message) {
+func (cmd *HelpCommand) SetRequestMessage(message *tgbotapi.Message) {
 	cmd.originalMessage = message
 }
 
-func (cmd *EchoCommand) GetResponseMessage() (*container.Response, error) {
+func (cmd *HelpCommand) GetResponseMessage() (*container.Response, error) {
 	config := tgbotapi.NewMessage(cmd.originalMessage.Chat.ID, cmd.originalMessage.Text)
-	config.ReplyToMessageID = cmd.originalMessage.MessageID
-	config.Text = "You just said this."
+	config.Text = "TODO: Help message."
 
 	response := &container.Response{
 		ResponseConfig: config,
