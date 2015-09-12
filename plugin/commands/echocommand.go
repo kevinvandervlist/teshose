@@ -30,7 +30,7 @@ func (cmd *EchoCommand) SetRequestMessage(message *tgbotapi.Message) {
 func (cmd *EchoCommand) GetResponseMessage() (*container.Response, error) {
 	config := tgbotapi.NewMessage(cmd.originalMessage.Chat.ID, cmd.originalMessage.Text)
 	config.ReplyToMessageID = cmd.originalMessage.MessageID
-	config.Text = "You just said this."
+	config.Text = "Is what you just said."
 
 	response := &container.Response{
 		ResponseConfig: config,
