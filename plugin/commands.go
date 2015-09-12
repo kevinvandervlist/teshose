@@ -7,6 +7,8 @@ import (
 	"github.com/op/go-logging"
 	"github.com/Syfaro/telegram-bot-api"
 	"github.com/kevinvandervlist/teshose/container"
+	"sort"
+	"fmt"
 )
 
 type Plugin struct {
@@ -22,6 +24,21 @@ type PluginInstance interface {
 func Create(logger *logging.Logger) (*Plugin) {
 	return &Plugin{
 		logger: logger,
+	}
+}
+
+func (plugin *Plugin) CreateDescriptions() {
+	cmds := []string{"echo", "help", "lingerie", "tetten", "noop"}
+	sort.Strings(cmds)
+
+	plugin.logger.Info("Available descriptions: ")
+
+	for _,cmd := range cmds {
+		_func, err := plugin.getDescription(cmd)
+		if (err != nil) {
+			panic(err)
+		}
+		fmt.Printf("%s\n", _func())
 	}
 }
 
@@ -52,6 +69,15 @@ func (plugin *Plugin) getMethod(pluginCmd string) (func() (PluginInstance), erro
 		return nil, errors.New("No plugin found")
 	}
 	return method.Interface().(func()(PluginInstance)), nil
+}
+
+func (plugin *Plugin) getDescription(cmd string) (func() (string), error) {
+	before := "Create" + strings.ToUpper(cmd[:1]) + strings.ToLower(cmd[1:]) + "Description"
+	method := reflect.ValueOf(plugin).MethodByName(before)
+	if !method.IsValid() {
+		return nil, errors.New("No plugin found")
+	}
+	return method.Interface().(func()(string)), nil
 }
 
 func (plugin *Plugin) getCommand(cmd string) (string, error) {

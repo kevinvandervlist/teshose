@@ -26,7 +26,7 @@ func (tumblr *Tumblr) GetName() string {
 }
 
 func (tumblr *Tumblr) GetRandomPage() (string, error) {
-	source := "http://tettenvrouw.tumblr.com/random"
+	source := "http://" + tumblr.title + ".tumblr.com/random"
 	response, err := http.Get(source)
 	if err != nil {
 		return "", err
@@ -39,15 +39,6 @@ func (tumblr *Tumblr) GetRandomPage() (string, error) {
 		return "", err
 	}
 	return string(page), nil
-}
-
-func (tumblr *Tumblr) GetImageUrlFromPage(page string) (string, error) {
-	switch tumblr.title {
-	case "tettenvrouw":
-		return tettenvrouw(page)
-	default:
-		return "", errors.New("No implementation found for tumblr " + tumblr.title)
-	}
 }
 
 func (tumblr *Tumblr) DownloadImage(url string) (string, error) {
@@ -64,21 +55,26 @@ func (tumblr *Tumblr) DownloadImage(url string) (string, error) {
 	}
 	filename := path.Base(url)
 
-	//fh, err := ioutil.WriteFile(tumblr.tempFolder + os.PathListSeparator + tumblr.title + , contents, 0644)
-	//fh, err := ioutil.TempFile(tumblr.tempFolder, tumblr.title)
-	//defer fh.Close()
-
 	if err != nil {
 		return "", err
 	}
-	//path := fh.Name()
-	//_, err = fh.Write(contents)
 	path := tumblr.tempFolder + "/" + tumblr.title + filename
 	err = ioutil.WriteFile(path, contents, 0644)
 	if err != nil {
 		return "", err
 	} else {
 		return path, nil
+	}
+}
+
+func (tumblr *Tumblr) GetImageUrlFromPage(page string) (string, error) {
+	switch tumblr.title {
+	case "tettenvrouw":
+		return tettenvrouw(page)
+	case "lingeriebomb":
+		return lingeriebomb(page)
+	default:
+		return "", errors.New("No implementation found for tumblr " + tumblr.title)
 	}
 }
 
@@ -89,6 +85,24 @@ func tettenvrouw(page string) (string, error) {
 		return "", err
 	}
 	selection := doc.Find(".main_photo").EachWithBreak(func (i int, s *goquery.Selection) (bool) {
+		_, exists := s.Attr("src")
+		return exists
+	})
+	uri, exists := selection.Attr("src")
+	if exists {
+		return uri, nil
+	} else {
+		return "", errors.New("No URI found.")
+	}
+}
+
+func lingeriebomb(page string) (string, error) {
+	reader := strings.NewReader(page)
+	doc, err := goquery.NewDocumentFromReader(reader)
+	if err != nil {
+		return "", err
+	}
+	selection := doc.Find(".notPhotoset").EachWithBreak(func (i int, s *goquery.Selection) (bool) {
 		_, exists := s.Attr("src")
 		return exists
 	})

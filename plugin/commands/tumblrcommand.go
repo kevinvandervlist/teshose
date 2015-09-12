@@ -10,27 +10,29 @@ import (
 	"strconv"
 )
 
-type TettenVrouwCommand struct {
+type TumblrCommand struct {
 	hasCompleted bool
 	logger *logging.Logger
+	tumblr string
 	originalMessage *tgbotapi.Message
 	expected int
 	handled int
 }
 
-func CreateTettenVrouwCommand(logger *logging.Logger) *TettenVrouwCommand {
-	return &TettenVrouwCommand{
+func CreateTumblrCommand(tumblr string, logger *logging.Logger) *TumblrCommand {
+	return &TumblrCommand{
 		logger: logger,
+		tumblr: tumblr,
 		expected: 1,
 		handled: 0,
 	}
 }
 
-func (cmd *TettenVrouwCommand) HasCompleted() bool {
+func (cmd *TumblrCommand) HasCompleted() bool {
 	return cmd.handled == cmd.expected
 }
 
-func (cmd *TettenVrouwCommand) SetRequestMessage(message *tgbotapi.Message) {
+func (cmd *TumblrCommand) SetRequestMessage(message *tgbotapi.Message) {
 	cmd.originalMessage = message
 	splitted := strings.Split(message.Text, " ")
 	if(len(splitted) < 2) {
@@ -49,8 +51,8 @@ func (cmd *TettenVrouwCommand) SetRequestMessage(message *tgbotapi.Message) {
 	}
 }
 
-func (cmd *TettenVrouwCommand) GetResponseMessage() (*container.Response, error) {
-	tumblr := backends.CreateTumblr("tettenvrouw")
+func (cmd *TumblrCommand) GetResponseMessage() (*container.Response, error) {
+	tumblr := backends.CreateTumblr(cmd.tumblr)
 	page, err := tumblr.GetRandomPage()
 	if err != nil {
 		return nil, err
@@ -70,8 +72,8 @@ func (cmd *TettenVrouwCommand) GetResponseMessage() (*container.Response, error)
 	cmd.logger.Debug("Downloaded image %s to path %s\n", url, path)
 
 	config := tgbotapi.NewPhotoUpload(cmd.originalMessage.Chat.ID, path)
-	config.ReplyToMessageID = cmd.originalMessage.MessageID
-	config.Caption = tumblr.GetName()
+	//config.ReplyToMessageID = cmd.originalMessage.MessageID
+	config.Caption = "Source: " + tumblr.GetName() + ".tumblr.com"
 
 	response := &container.Response{
 		ResponseConfig: config,

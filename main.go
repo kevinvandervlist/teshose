@@ -21,12 +21,13 @@ func main() {
 	err := api.Connect()
 	api.Debug(true)
 
-	commands := plugin.Create(log)
-
 	if(err != nil) {
 		log.Critical("A connection error occurred: ", err)
 		panic(err)
 	}
+
+	commands := plugin.Create(log)
+	commands.CreateDescriptions()
 
 	for {
 		select {
